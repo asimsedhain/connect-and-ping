@@ -1,9 +1,15 @@
 function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
+	return Math.floor(Math.random() * max);
 }
-const random = getRandomInt(1000);
 
-const url = "ws://localhost:3000/ws?user_id=browser-tab-"+random
+function getUrl(s) {
+	let location = window.location;
+	return ((location.protocol === "https:") ? "wss://" : "ws://") + location.host + s;
+}
+
+const id = getRandomInt(1000);
+
+const url = getUrl("/ws?user_id=browser-tab-" + id)
 const socket = new WebSocket(url);
 
 socket.addEventListener('open', function(_event) {
