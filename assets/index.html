@@ -56,14 +56,14 @@
 	<div id="client-list-container" hx-ext="client-side-templates">
 
 		<h3>Connected Clients</h3>
-		<ul id="client-list" hx-get="/clients" hx-trigger="every 4s" hx-swap="innerHTML"
+		<ul id="client-list" hx-get="/clients" hx-trigger="load, every 4s" hx-swap="innerHTML"
 			mustache-template="client-list-template">
 			<li>Loading...</li>
 		</ul>
 
-		<template id="client-list-template">
+		<template id="client-list-template" >
 			{{#clients}}
-			<li>{{.}}</li>
+			<li hx-get="/ping_client/{{.}}" hx-swap="none">{{.}}</li>
 			{{/clients}}
 		</template>
 	</div>
