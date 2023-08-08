@@ -1,9 +1,9 @@
 use anyhow::Result;
 use futures::stream::SplitSink;
-use futures_util::SinkExt;
-use std::borrow::Cow;
+use futures::SinkExt;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 use axum::extract::ws::{Message, WebSocket};
 
@@ -29,38 +29,29 @@ impl Default for App {
 }
 
 impl App {
-    pub fn add_client<N: Into<String>>(&self, name: N, sink: Sink) -> Result<()> {
-        let mut map = self.connected_clients.lock().unwrap();
+    pub async fn add_client<N: Into<String>>(&self, name: N, sink: Sink) -> Result<()> {
+        let mut map = self.connected_clients.lock().await;
         map.insert(name.into(), sink);
 
         Ok(())
     }
-    pub fn list_clients(&self) -> Vec<String> {
-        let map = self.connected_clients.lock().unwrap();
+    pub async fn list_clients(&self) -> Vec<String> {
+        let map = self.connected_clients.lock().await;
 
         map.keys().cloned().collect()
     }
-    pub fn remove_client(&self, name: &str) -> Result<()> {
-        let mut map = self.connected_clients.lock().unwrap();
+    pub async fn remove_client(&self, name: &str) -> Result<()> {
+        let mut map = self.connected_clients.lock().await;
         map.remove(name);
 
         Ok(())
     }
 
-    // TODO
-    // Fix
     pub async fn send_message(&self, client_id: &str, message: &str) {
-        todo!()
-        //let client = {
-            //let mut client_map = self.connected_clients.lock().unwrap();
-            //let Some(client) = client_map.get_mut(client_id) else{
-                //return;
-            //};
-            //client.clone()
+        let mut client_map = self.connected_clients.lock().await;
+        let Some(client) = client_map.get_mut(client_id) else{
+        return;};
 
-        //};
-        
-
-        //client.send(Message::Text(message.to_string())).await;
+        let _ = client.send(Message::Text(message.to_string())).await;
     }
 }

@@ -35,7 +35,7 @@ async fn handle_socket(socket: WebSocket, user_id: String, app: App) {
 
     tracing::debug!("Adding user: {} to pool", &user_id);
 
-    if app.add_client(&user_id, sender).is_err() {
+    if app.add_client(&user_id, sender).await.is_err() {
         tracing::debug!("Could not add user: {user_id} to app");
         return;
     }
@@ -45,6 +45,6 @@ async fn handle_socket(socket: WebSocket, user_id: String, app: App) {
             break;
         }
     }
-    app.remove_client(&user_id).unwrap();
+    app.remove_client(&user_id).await;
     tracing::debug!("Websocket closed!");
 }
