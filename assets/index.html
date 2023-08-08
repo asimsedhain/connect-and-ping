@@ -1,2 +1,72 @@
-<a>Open the console to see stuff, then refresh to initiate exchange.</a>
-<script src='script.js'></script>
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Connected Hosts</title>
+	<script src="https://unpkg.com/htmx.org"></script>
+	<script src="https://unpkg.com/htmx.org/dist/ext/client-side-templates.js"></script>
+	<script src="https://unpkg.com/mustache@latest"></script>
+	<script src='script.js'></script>
+	<style>
+		body {
+			--bg-color: white;
+			--text-color: black;
+			--hover-color: #ddd;
+
+			background-color: var(--bg-color);
+			color: var(--text-color);
+		}
+
+		@media screen and (prefers-color-scheme: dark) {
+			body {
+				--bg-color: #222;
+				--text-color: white;
+				--hover-color: #666;
+			}
+		}
+
+		#client-list-container {
+			display: flex;
+			flex-direction: column;
+		}
+
+		#client-list {
+			display: flex;
+			flex-direction: column;
+			list-style-type: none;
+		}
+
+		#client-list>li {
+			padding: 0.5em;
+			background-color: var(--bg-color);
+		}
+
+		#client-list>li:hover {
+			background-color: var(--hover-color);
+			cursor: pointer;
+
+		}
+	</style>
+</head>
+
+<body>
+
+	<div id="client-list-container" hx-ext="client-side-templates">
+
+		<h3>Connected Clients</h3>
+		<ul id="client-list" hx-get="/clients" hx-trigger="every 4s" hx-swap="innerHTML"
+			mustache-template="client-list-template">
+			<li>Loading...</li>
+		</ul>
+
+		<template id="client-list-template">
+			{{#clients}}
+			<li>{{.}}</li>
+			{{/clients}}
+		</template>
+	</div>
+</body>
+
+</html>
