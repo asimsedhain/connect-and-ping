@@ -40,11 +40,9 @@ impl App {
 
         map.keys().cloned().collect()
     }
-    pub async fn remove_client(&self, name: &str) -> Result<()> {
+    pub async fn remove_client(&self, name: &str) -> Option<Sink> {
         let mut map = self.connected_clients.lock().await;
-        map.remove(name);
-
-        Ok(())
+        map.remove(name)
     }
 
     pub async fn send_message(&self, client_id: &str, message: &str) {

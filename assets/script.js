@@ -17,8 +17,8 @@ socket.addEventListener('open', function(_event) {
 	console.log(`Socket connected to ${url}`);
 });
 
-socket.addEventListener("close", function(_ev) {
-	console.log("Socker closed");
+socket.addEventListener("close", function(event) {
+	console.log("Socker closed: ", event);
 })
 
 socket.addEventListener('message', function(event) {

@@ -7,6 +7,7 @@ use axum::{
     response::IntoResponse,
 };
 use futures::StreamExt;
+use futures_util::SinkExt;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -45,6 +46,8 @@ async fn handle_socket(socket: WebSocket, user_id: String, app: App) {
             break;
         }
     }
-    app.remove_client(&user_id).await;
-    tracing::debug!("Websocket closed!");
+    let client = app.remove_client(&user_id).await;
+    if let Some(mut client) = client {
+        let _ = client.close().await;
+    }
 }
