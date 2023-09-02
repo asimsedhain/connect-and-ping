@@ -1,9 +1,10 @@
 mod api;
 mod app;
+mod utils;
 
 use axum::{routing::get, Router};
 
-use std::path::PathBuf;
+use std::{net::SocketAddr, path::PathBuf};
 use tower_http::{
     services::ServeDir,
     trace::{DefaultMakeSpan, TraceLayer},
@@ -14,16 +15,21 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use api::websocket::ws_handler;
 use app::App;
 
-use crate::api::rest::{get_clients, ping_client};
+use crate::{
+    api::rest::{get_clients, ping_client},
+    utils::load_env,
+};
 
 #[tokio::main]
 async fn main() {
+    let config = load_env().unwrap();
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "axum_dryrun=debug,tower_http=info".into()),
+                .unwrap_or_else(|_| config.log_level.into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().compact())
         .init();
 
     let assets_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets");
@@ -36,8 +42,13 @@ async fn main() {
         .route("/ping_client/:client", get(ping_client))
         .with_state(App::default());
 
-    tracing::debug!("listening on 3000");
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    let addr: SocketAddr = format!("0.0.0.0:{}", config.port)
+        .parse()
+        .expect("Can not parse address and port");
+
+    tracing::info!("listening on {}", &addr);
+
+    axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
